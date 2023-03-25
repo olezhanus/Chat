@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="Chat.cpp" />
     <ClCompile Include="Crypto.cpp" />
+    <ClCompile Include="Functions.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Message.cpp" />
     <ClCompile Include="Program.cpp" />
@@ -137,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="Chat.h" />
     <ClInclude Include="Crypto.h" />
+    <ClInclude Include="Functions.h" />
     <ClInclude Include="Message.h" />
     <ClInclude Include="Program.h" />
     <ClInclude Include="User.h" />

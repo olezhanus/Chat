@@ -8,12 +8,31 @@ Hash::Hash(const Hash &other) : _data(other._data)
 {
 }
 
+Hash::Hash(Hash &&other) : _data(std::move(other._data))
+{
+}
+
+Hash &Hash::operator=(const Hash &other)
+{
+	if (&other == this)
+	{
+		return *this;
+	}
+	_data = other._data;
+	return *this;
+}
+
+Hash &Hash::operator=(Hash &&other)
+{
+	if (&other == this)
+	{
+		return *this;
+	}
+	_data = std::move(other._data);
+	return *this;
+}
+
 bool Hash::operator==(const Hash &other)
 {
 	return _data == other._data;
-}
-
-const Hash &hash(const std::string &data)
-{
-	return Hash(data);
 }

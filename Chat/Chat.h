@@ -6,14 +6,16 @@
 class Chat : public std::enable_shared_from_this<Chat>
 {
 public:
-	Chat();
+	Chat() noexcept;
 	Chat(const Chat &other) = delete;
-	Chat(Chat &&other);
+	Chat(Chat &&other) noexcept;
 	Chat &operator=(const Chat &other) = delete;
-	Chat &operator=(Chat &&other);
-	~Chat();
+	Chat &operator=(Chat &&other) noexcept;
+	auto &users() const noexcept;
+	auto &messages() const noexcept;
+	~Chat() noexcept;
 private:
-	std::vector<std::shared_ptr<User>> _users;
+	std::vector<std::weak_ptr<User>> _users;
 	std::vector<std::shared_ptr<Message>> _messages;
 };
 

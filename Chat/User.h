@@ -17,9 +17,9 @@ public:
 	~User() noexcept = default;
 private:
 	static size_t _Id_Counter;
-	size_t _id;
-	std::string _username;
-	std::string _login;
+	size_t _id { 0 };
+	std::string _username {};
+	std::string _login {};
 	Hash _password;
 };
 
