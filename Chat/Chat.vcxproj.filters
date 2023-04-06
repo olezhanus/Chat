@@ -30,12 +30,6 @@
     <ClCompile Include="Program.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Crypto.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Functions.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Message.h">
@@ -47,13 +41,7 @@
     <ClInclude Include="Chat.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Crypto.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="Program.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Functions.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

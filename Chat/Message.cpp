@@ -1,31 +1,33 @@
 #include "Message.h"
 
-auto &Message::date() const noexcept
+auto Message::date() const noexcept -> time_t
 {
 	return _date;
 }
 
-auto &Message::message()const noexcept
+auto Message::message()const noexcept -> const std::string &
 {
 	return _message;
 }
 
-Message::Message(const std::string &message, std::weak_ptr<User> from, std::weak_ptr<Chat> _to) noexcept :
-	_message(message), _date(std::chrono::system_clock::now())
+auto Message::from() const noexcept -> const std::weak_ptr<User>
 {
+	return _from;
 }
 
-Message::Message(std::string &&message, std::weak_ptr<User> from, std::weak_ptr<Chat> _to) noexcept :
-	_message(message), _date(std::chrono::system_clock::now())
+Message::Message(std::string &&message, std::weak_ptr<User> from) noexcept :
+	_message(message), _from(from),
+	_date(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()))
 {
 }
 
 Message::Message(Message &&other) noexcept :
-	_date(std::move(other._date)),_message(std::move(other._message))
+	_message(std::move(other._message)), _date(other._date), _from(std::move(other._from))
 {
+	other._date = 0;
 }
 
-Message &Message::operator=(Message &&other)
+Message &Message::operator=(Message &&other) noexcept
 {
 	if (&other == this)
 	{
@@ -33,7 +35,7 @@ Message &Message::operator=(Message &&other)
 	}
 	_date = std::move(other._date);
 	_message = std::move(other._message);
-	_date = std::chrono::time_point<std::chrono::system_clock>();
-	_message = std::string();
+	_date = other._date;
+	other._date = 0;
 	return *this;
 }
