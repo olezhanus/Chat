@@ -34,7 +34,6 @@ void Basic_Program::run()
 		{
 			if (_current_chat.expired())
 			{
-				show_chats();
 				std::cout << "esc - выход.\ts - выбрать чат.\td - удалить чат\t\tn - новый чат.\n";
 				char command;
 				do
@@ -54,14 +53,24 @@ void Basic_Program::run()
 				if (command == 's' || command == 'S' ||
 					command == 'd' || command == 'D')
 				{
+					show_chats();
+					std::string number_string;
 					size_t number = 0;
+					bool is_continue;
 
 					std::cout << "Введите номер: ";
-					while (!(std::cin >> number) || number >= _logined_user.lock()->chats().size());
+					while (is_continue = get_string(number_string))
 					{
-						std::cin.clear();
-						std::cin.ignore(INT_MAX, '\n');
-						std::cout << "Введите корректный номер: ";
+						if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= _logined_user.lock()->chats().size())
+						{
+							std::cout << "\nВведите корректный номер: ";
+							continue;
+						}
+						break;
+					}
+					if (!is_continue)
+					{
+						continue;
 					}
 
 					auto index = _logined_user.lock()->chats().size() - number - 1;
@@ -88,8 +97,8 @@ void Basic_Program::run()
 								_chats.begin(),
 								_chats.end(),
 								_logined_user.lock()->chats().at(index).lock()));
-							_logined_user.lock()->chats().erase(_logined_user.lock()->chats().begin() + index);
 						}
+						_logined_user.lock()->chats().erase(_logined_user.lock()->chats().begin() + index);
 					}
 				}
 				if (command == 'n' || command == 'N')
@@ -97,17 +106,34 @@ void Basic_Program::run()
 					// Создаём новый чат с выбранным пользователем и добавляем его во все соответствующие вектора
 					system("cls");
 					show_users();
+					std::string number_string;
 					size_t number = 0;
+					bool is_continue;
 
 					std::cout << "Введите номер: ";
-					while (!(std::cin >> number) || number >= _users.size());
+					while (is_continue = get_string(number_string))
 					{
-						std::cin.clear();
-						std::cin.ignore(INT_MAX, '\n');
-						std::cout << "Введите корректный номер: ";
+						if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= _users.size())
+						{
+							std::cout << "\nВведите корректный номер: ";
+							continue;
+						}
+
+						if (_users.at(number) == _logined_user.lock())
+						{
+							std::cout <<
+								"\nВ беседе не может быть два одинаковых пользователя\n"
+								"Введите корректный номер: ";
+							continue;
+						}
+						break;
+					}
+					if (!is_continue)
+					{
+						continue;
 					}
 
-					std::cout << "Введите название: ";
+					std::cout << "\nВведите название: ";
 					std::string title;
 					if (!get_string(title, NAME_MIN_LENGTH))
 					{
@@ -123,6 +149,9 @@ void Basic_Program::run()
 			}
 			else
 			{
+				std::cout <<
+					"Введите сообщение или одну из следующих команд:\n"
+					"/add_user - добавить участника\t/show_users - показать участников беседы\n\n";
 				show_messages();
 				std::string message_string;
 				while (true)
@@ -265,7 +294,7 @@ void Basic_Program::show_chats()
 	}
 }
 
-void Basic_Program::show_users() 
+void Basic_Program::show_users()
 {
 	for (size_t i = 0; i < _users.size(); ++i)
 	{
@@ -286,10 +315,10 @@ void Basic_Program::print_message(const std::shared_ptr<Message> mes) noexcept
 	tm _tm;
 	time_t t = mes->date();
 	localtime_s(&_tm, &t);
-	auto date = std::put_time(&_tm, "%T");
+	auto date = std::put_time(&_tm, "%Y %T");
 	std::cout <<
-		(mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n\n" <<
-		mes->message() << '\n\n' <<
+		(mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n" <<
+		mes->message() << "\n" <<
 		date << "\n\n\n";
 }
 
@@ -299,16 +328,48 @@ void Basic_Program::do_command(const std::string &command)
 	{
 		system("cls");
 		show_users();
+		std::string number_string;
 		size_t number = 0;
-
+		bool is_return;
 		std::cout << "Введите номер: ";
-		while (!(std::cin >> number) || number >= _users.size());
+		while (is_return = get_string(number_string))
 		{
-			std::cin.clear();
-			std::cin.ignore(INT_MAX, '\n');
-			std::cout << "Введите корректный номер: ";
+			if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= _users.size())
+			{
+				std::cout << "\nВведите корректный номер: ";
+				continue;
+			}
+
+			if (std::find_if(
+				_current_chat.lock()->users().begin(),
+				_current_chat.lock()->users().end(),
+				[=](std::weak_ptr<User> el) -> bool
+				{
+					return el.lock() == _users.at(number);
+				}) != _current_chat.lock()->users().end())
+			{
+				std::cout <<
+					"\nВ беседе не может быть два одинаковых пользователя\n"
+					"Введите корректный номер: ";
+				continue;
+			}
+				break;
 		}
+		if (!is_return)
+		{
+			return;
+		}
+
 		_current_chat.lock()->add_user(_users.at(number));
+	}
+	else if (command == "/show_users")
+	{
+		system("cls");
+		for (auto &user : _current_chat.lock()->users())
+		{
+			std::cout << user.lock()->username() << "\n\n";
+		}
+		_getch();
 	}
 	else
 	{
@@ -358,7 +419,7 @@ bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_pass
 		else
 		{
 			str += ch;
-			std::cout << (is_password ? '*' : ch);
+			std::cout << (is_password ? '*' : ch); // Русский язык не завезли
 		}
 	}
 }
