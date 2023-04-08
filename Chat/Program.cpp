@@ -97,7 +97,7 @@ void Basic_Program::run()
 								return el.lock() == _logined_user.lock();
 							});
 
-						user_chat->new_message(std::make_shared<Message>(std::move("*Покинул беседу*"), _logined_user));
+						user_chat->new_message(std::make_shared<Message>(std::move("*Покинул чат*"), _logined_user));
 						user_chat_users.erase(iter);
 						if (user_chat_users.empty())
 						{
