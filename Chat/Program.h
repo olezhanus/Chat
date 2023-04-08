@@ -37,7 +37,7 @@ protected:
 	virtual void show_chats();
 	virtual void show_users();
 	virtual void show_messages() noexcept;
-	virtual void print_message(const std::shared_ptr<Message> mes) noexcept;
+	virtual void print_message(const std::shared_ptr<Message> &mes) noexcept;
 
 	virtual void do_command(const std::string &command);
 	virtual bool get_string(std::string &out, size_t min_length = 0, bool is_password = false, bool need_to_erase = false, char enter = ENTER, char escape = ESCAPE) noexcept;

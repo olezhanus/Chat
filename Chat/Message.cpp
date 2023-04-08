@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Message.h"
 
 auto Message::date() const noexcept -> time_t
@@ -16,8 +19,8 @@ auto Message::from() const noexcept -> const std::weak_ptr<User>
 }
 
 Message::Message(std::string &&message, std::weak_ptr<User> from) noexcept :
-	_message(message), _from(from),
-	_date(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()))
+	_date(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())),
+	_message(message), _from(std::move(from))
 {
 }
 

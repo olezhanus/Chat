@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Program.h"
 
 void Basic_Program::run()
@@ -58,10 +61,12 @@ void Basic_Program::run()
 					size_t number = 0;
 					bool is_continue;
 
+					auto &user_chats = _logined_user.lock()->chats();
+					auto size = user_chats.size();
 					std::cout << "Введите номер: ";
 					while (is_continue = get_string(number_string))
 					{
-						if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= _logined_user.lock()->chats().size())
+						if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= size)
 						{
 							std::cout << "\nВведите корректный номер: ";
 							continue;
@@ -73,32 +78,35 @@ void Basic_Program::run()
 						continue;
 					}
 
-					auto index = _logined_user.lock()->chats().size() - number - 1;
+					auto index = size - number - 1;
 
 					if (command == 's' || command == 'S')
 					{
-						_current_chat = _logined_user.lock()->chats().at(index);
+						_current_chat = user_chats[index];
 					}
 					if (command == 'd' || command == 'D')
 					{
 						// выходим из чата. Если чат пуст, удаляем его
+						auto user_chat = user_chats[index].lock();
+						auto &user_chat_users = user_chat->users();
 						auto iter = std::find_if(
-							_logined_user.lock()->chats().at(index).lock()->users().begin(),
-							_logined_user.lock()->chats().at(index).lock()->users().end(),
+							user_chat_users.begin(),
+							user_chat_users.end(),
 							[=](std::weak_ptr<User> el) -> bool
 							{
 								return el.lock() == _logined_user.lock();
 							});
 
-						_logined_user.lock()->chats().at(index).lock()->users().erase(iter);
-						if (_logined_user.lock()->chats().at(index).lock()->users().empty())
+						user_chat_users.erase(iter);
+						if (user_chat_users.empty())
 						{
-							_chats.erase(std::find(
+							auto chat_to_erase = std::find(
 								_chats.begin(),
 								_chats.end(),
-								_logined_user.lock()->chats().at(index).lock()));
+								user_chat);
+							_chats.erase(chat_to_erase);
 						}
-						_logined_user.lock()->chats().erase(_logined_user.lock()->chats().begin() + index);
+						user_chats.erase(user_chats.begin() + index);
 					}
 				}
 				if (command == 'n' || command == 'N')
@@ -119,7 +127,7 @@ void Basic_Program::run()
 							continue;
 						}
 
-						if (_users.at(number) == _logined_user.lock())
+						if (_users[number] == _logined_user.lock())
 						{
 							std::cout <<
 								"\nВ беседе не может быть два одинаковых пользователя\n"
@@ -141,9 +149,9 @@ void Basic_Program::run()
 					}
 					_chats.emplace_back(std::make_shared<Chat>(std::move(title)));
 					_chats.back()->add_user(_logined_user.lock());
-					_chats.back()->add_user(_users.at(number));
+					_chats.back()->add_user(_users[number]);
 					_logined_user.lock()->chats().push_back(_chats.back());
-					_users.at(number)->chats().push_back(_chats.back());
+					_users[number]->chats().push_back(_chats.back());
 					_current_chat = _chats.back();
 				}
 			}
@@ -164,7 +172,7 @@ void Basic_Program::run()
 					}
 					if (!message_string.empty())
 					{
-						if (message_string.at(0) == '/')
+						if (message_string[0] == '/')
 						{
 							do_command(message_string);
 							break;
@@ -174,18 +182,19 @@ void Basic_Program::run()
 							_current_chat.lock()->new_message(std::make_shared<Message>(std::move(message_string), _logined_user));
 
 							// Перемещаем _current_chat с новым сообщением в конец массива
-							if (_current_chat.lock() != _logined_user.lock()->chats().back().lock())
+							auto &user_chat = _logined_user.lock()->chats();
+							if (_current_chat.lock() != user_chat.back().lock())
 							{
 								auto iter = std::find_if(
-									_logined_user.lock()->chats().begin(),
-									_logined_user.lock()->chats().end(),
+									user_chat.begin(),
+									user_chat.end(),
 									[=](std::weak_ptr<Chat> el) -> bool
 									{
 										return el.lock() == _current_chat.lock();
 									});
 								auto item = *iter;
-								_logined_user.lock()->chats().erase(iter);
-								_logined_user.lock()->chats().emplace_back(std::move(item));
+								user_chat.erase(iter);
+								user_chat.emplace_back(std::move(item));
 							}
 
 							print_message(_current_chat.lock()->messages().back());
@@ -284,13 +293,11 @@ void Basic_Program::log_out() noexcept
 
 void Basic_Program::show_chats()
 {
-	for (size_t i = 0; i < _logined_user.lock()->chats().size(); ++i)
+	auto size = _logined_user.lock()->chats().size();
+	for (size_t i = 0; i < size; ++i)
 	{
 		std::cout << i << '\t' <<
-			_logined_user.lock()->
-			chats().at(
-				_logined_user.lock()->chats().size() - i - 1
-			).lock()->title() << "\n\n";
+			_logined_user.lock()->chats()[size - i - 1].lock()->title() << "\n\n";
 	}
 }
 
@@ -298,7 +305,7 @@ void Basic_Program::show_users()
 {
 	for (size_t i = 0; i < _users.size(); ++i)
 	{
-		std::cout << i << '\t' << _users.at(i)->username() << "\n\n";
+		std::cout << i << '\t' << _users[i]->username() << "\n\n";
 	}
 }
 
@@ -310,7 +317,7 @@ void Basic_Program::show_messages() noexcept
 	}
 }
 
-void Basic_Program::print_message(const std::shared_ptr<Message> mes) noexcept
+void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 {
 	tm _tm;
 	time_t t = mes->date();
@@ -331,6 +338,8 @@ void Basic_Program::do_command(const std::string &command)
 		std::string number_string;
 		size_t number = 0;
 		bool is_return;
+
+		auto &chat_users = _current_chat.lock()->users();
 		std::cout << "Введите номер: ";
 		while (is_return = get_string(number_string))
 		{
@@ -341,12 +350,12 @@ void Basic_Program::do_command(const std::string &command)
 			}
 
 			if (std::find_if(
-				_current_chat.lock()->users().begin(),
-				_current_chat.lock()->users().end(),
+				chat_users.begin(),
+				chat_users.end(),
 				[=](std::weak_ptr<User> el) -> bool
 				{
-					return el.lock() == _users.at(number);
-				}) != _current_chat.lock()->users().end())
+					return el.lock() == _users[number];
+				}) != chat_users.end())
 			{
 				std::cout <<
 					"\nВ беседе не может быть два одинаковых пользователя\n"
@@ -360,7 +369,7 @@ void Basic_Program::do_command(const std::string &command)
 			return;
 		}
 
-		_current_chat.lock()->add_user(_users.at(number));
+		_current_chat.lock()->add_user(_users[number]);
 	}
 	else if (command == "/show_users")
 	{
@@ -380,10 +389,9 @@ void Basic_Program::do_command(const std::string &command)
 bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_password, bool need_to_erase, char enter, char escape) noexcept
 {
 	std::string str;
-	char ch = 0;
 	while (true)
 	{
-		ch = _getch();
+		const char ch = _getch();
 		if (ch == BACKSPACE)
 		{
 			if (!str.empty())

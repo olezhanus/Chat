@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Chat.h"
 
 Chat::Chat(std::string &&title) noexcept : 
@@ -41,11 +44,11 @@ void Chat::add_user(std::shared_ptr<User> user)
 {
 	if (user->id() != 0)
 	{
-		_users.push_back(user);
+		_users.emplace_back(std::move(user));
 	}
 }
 
 void Chat::new_message(std::shared_ptr<Message> message)
 {
-	_messages.push_back(message);
+	_messages.emplace_back(std::move(message));
 }
