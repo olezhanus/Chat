@@ -97,6 +97,7 @@ void Basic_Program::run()
 								return el.lock() == _logined_user.lock();
 							});
 
+						user_chat->new_message(std::make_shared<Message>(std::move("*Покинул беседу*"), _logined_user));
 						user_chat_users.erase(iter);
 						if (user_chat_users.empty())
 						{
@@ -151,7 +152,7 @@ void Basic_Program::run()
 					_chats.back()->add_user(_logined_user.lock());
 					_chats.back()->add_user(_users[number]);
 					_logined_user.lock()->chats().push_back(_chats.back());
-					_users[number]->chats().push_back(_chats.back());
+					_users[number]->chats().emplace_back(_chats.back());
 					_current_chat = _chats.back();
 				}
 			}
@@ -370,6 +371,7 @@ void Basic_Program::do_command(const std::string &command)
 		}
 
 		_current_chat.lock()->add_user(_users[number]);
+		_users[number]->chats().emplace_back(_current_chat);
 	}
 	else if (command == "/show_users")
 	{
