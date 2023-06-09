@@ -1,0 +1,51 @@
+{
+    "_Id_Counter": 2,
+    "_chats": [
+        {
+            "_id": 1,
+            "_messages": [
+                {
+                    "_date": 1686317805,
+                    "_from_id": 1,
+                    "_message": "helo"
+                },
+                {
+                    "_date": 1686317809,
+                    "_from_id": 1,
+                    "_message": "\u0000\u0000\u0000\u0000"
+                }
+            ],
+            "_title": "ab",
+            "_users_id": [
+                1,
+                2
+            ]
+        },
+        {
+            "_id": 2,
+            "_messages": [
+                {
+                    "_date": 1686317899,
+                    "_from_id": 3,
+                    "_message": "hi"
+                },
+                {
+                    "_date": 1686317918,
+                    "_from_id": 1,
+                    "_message": "hello"
+                },
+                {
+                    "_date": 1686317947,
+                    "_from_id": 2,
+                    "_message": "privet"
+                }
+            ],
+            "_title": "abc",
+            "_users_id": [
+                3,
+                1,
+                2
+            ]
+        }
+    ]
+}

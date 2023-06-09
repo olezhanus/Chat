@@ -3,32 +3,162 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Program.h"
 
+Basic_Program::Basic_Program() noexcept
+{
+	nlohmann::json chats_json, users_json;
+
+	std::fstream USERS(USERS_FILE, std::ios::in);
+
+	if (USERS.is_open())
+	{
+		try
+		{
+			USERS >> users_json;
+			User::_Id_Counter = users_json["_Id_Counter"];
+			for (auto &j : users_json["_users"])
+			{
+				_users.emplace_back(std::make_shared<User>(User::from_json(j)));
+			}
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << e.what();
+			sleep(1000);
+		}
+		USERS.close();
+	}
+
+	std::fstream CHATS(CHATS_FILE, std::ios::in);
+
+	if (CHATS.is_open())
+	{
+		try
+		{
+			CHATS >> chats_json;
+			Chat::_Id_Counter = chats_json["_Id_Counter"];
+			for (auto &j : chats_json["_chats"])
+			{
+				auto chat = std::make_shared<Chat>(Chat::from_json(j));
+				_chats.emplace_back(chat);
+				for (auto user_id : j["_users_id"])
+				{
+					auto user_to_add = std::find_if(
+						_users.begin(),
+						_users.end(),
+						[=](std::shared_ptr<User> el) -> bool
+						{
+							return el->id() == user_id;
+						});
+					chat->add_user(*user_to_add);
+				}
+				for (size_t index = 0; index < _chats.back()->messages().size(); ++index)
+				{
+					auto user_from = std::find_if(
+						_users.begin(),
+						_users.end(),
+						[=](std::shared_ptr<User> el) -> bool
+						{
+							return el->id() == j["_messages"][index]["_from_id"];
+						});
+					chat->messages()[index]->_from = *user_from;
+				}
+
+			}
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << e.what();
+			sleep(1000);
+		}
+		CHATS.close();
+	}
+}
+
+Basic_Program::~Basic_Program()
+{
+	nlohmann::json chats_json, users_json;
+	chats_json["_Id_Counter"] = Chat::_Id_Counter;
+	users_json["_Id_Counter"] = User::_Id_Counter;
+	chats_json["_chats"] = nlohmann::json::array();
+	for (auto &chat : _chats)
+	{
+		chats_json["_chats"].emplace_back(Chat::to_json(*chat));
+	}
+	users_json["_users"] = nlohmann::json::array();
+	for (auto &user : _users)
+	{
+		users_json["_users"].emplace_back(User::to_json(*user));
+	}
+
+	std::fstream USERS(USERS_FILE, std::ios::out | std::ios::trunc);
+
+	if (USERS.is_open())
+	{
+		try
+		{
+			USERS << std::setw(4) << users_json;
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << e.what();
+			sleep(1000);
+		}
+		USERS.close();
+	}
+
+	std::fstream CHATS(CHATS_FILE, std::ios::out | std::ios::trunc);
+
+	if (CHATS.is_open())
+	{
+		try
+		{
+			CHATS << std::setw(4) << chats_json;
+		}
+		catch (const std::exception &e)
+		{
+			std::cout << e.what();
+		}
+		CHATS.close();
+	}
+	fs::permissions(USERS_FILE, fs::perms::owner_all);
+	fs::permissions(CHATS_FILE, fs::perms::owner_all);
+}
+
+
+
+
 void Basic_Program::run()
 {
+#ifdef _WIN64
+
+	setlocale(LC_ALL, "Russian");
+	SetConsoleCP(CP_UTF8);
+	SetConsoleOutputCP(CP_UTF8);
+
+#endif // _WIN64
+
+
 	while (true)
 	{
-		system("cls");
+		clear_screen();
 		if (_logined_user.expired())
 		{
-			std::cout << "esc - выход.\tl - войти.\ts - создать аккаунт.\n";
-			char command;
-			do
-			{
-				command = _getch();
-			}
-			while (command != ESCAPE &&
-				   command != 'l' && command != 'L' &&
-				   command != 's' && command != 'S'); // будет ждать ввода правильного символа
+			std::cout << QUIT_CMD " - выход.\tl - войти.\ts - создать аккаунт.\n";
+			std::string command;
+			bool is_break;
 
-			if (command == ESCAPE)
+			while ((is_break = get_string(command)) &&
+				   command != "l" && command != "s"); // будет ждать ввода правильного символа
+
+			if (!is_break)
 			{
 				break;
 			}
-			if (command == 'l' || command == 'L')
+			if (command == "l")
 			{
 				log_in();
 			}
-			if (command == 's' || command == 'S')
+			if (command == "s")
 			{
 				sign_up();
 			}
@@ -37,24 +167,19 @@ void Basic_Program::run()
 		{
 			if (_current_chat.expired())
 			{
-				std::cout << "esc - выход.\ts - выбрать чат.\td - удалить чат\t\tn - новый чат.\n";
-				char command;
-				do
-				{
-					command = _getch();
-				}
-				while (command != ESCAPE &&
-					   command != 's' && command != 'S' &&
-					   command != 'd' && command != 'D' &&
-					   command != 'n' && command != 'N');
+				std::cout << QUIT_CMD " - выход.\ts - выбрать чат.\td - удалить чат\t\tn - новый чат.\n";
+				std::string command;
+				bool is_continue;
 
-				if (command == ESCAPE)
+				while ((is_continue = get_string(command)) &&
+					   command != "s" && command != "d" && command != "n");
+
+				if (!is_continue)
 				{
 					log_out();
 					continue;
 				}
-				if (command == 's' || command == 'S' ||
-					command == 'd' || command == 'D')
+				if (command == "s" || command == "d")
 				{
 					show_chats();
 					std::string number_string;
@@ -80,11 +205,11 @@ void Basic_Program::run()
 
 					auto index = size - number - 1;
 
-					if (command == 's' || command == 'S')
+					if (command == "s")
 					{
 						_current_chat = user_chats[index];
 					}
-					if (command == 'd' || command == 'D')
+					if (command == "d")
 					{
 						// выходим из чата. Если чат пуст, удаляем его
 						auto user_chat = user_chats[index].lock();
@@ -110,10 +235,10 @@ void Basic_Program::run()
 						user_chats.erase(user_chats.begin() + index);
 					}
 				}
-				if (command == 'n' || command == 'N')
+				if (command == "n")
 				{
 					// Создаём новый чат с выбранным пользователем и добавляем его во все соответствующие вектора
-					system("cls");
+					clear_screen();
 					show_users();
 					std::string number_string;
 					size_t number = 0;
@@ -151,8 +276,6 @@ void Basic_Program::run()
 					_chats.emplace_back(std::make_shared<Chat>(std::move(title)));
 					_chats.back()->add_user(_logined_user.lock());
 					_chats.back()->add_user(_users[number]);
-					_logined_user.lock()->chats().push_back(_chats.back());
-					_users[number]->chats().emplace_back(_chats.back());
 					_current_chat = _chats.back();
 				}
 			}
@@ -160,7 +283,7 @@ void Basic_Program::run()
 			{
 				std::cout <<
 					"Введите сообщение или одну из следующих команд:\n"
-					"/add_user - добавить участника\t/show_users - показать участников беседы\n\n";
+					ADD_USERS_CMD " - добавить участника\t" SHOW_USERS_CMD " - показать участников беседы\n\n";
 				show_messages();
 				std::string message_string;
 				while (true)
@@ -212,7 +335,7 @@ void Basic_Program::log_in()
 	std::string login, password;
 	while (true)
 	{
-		system("cls");
+		clear_screen();
 		std::cout << "Логин: ";
 		if (!get_string(login))
 		{
@@ -229,7 +352,7 @@ void Basic_Program::log_in()
 		if (iter == _users.end())
 		{
 			std::cout << "\nПользователя с таким логином не существует";
-			_getch();
+			sleep(2000);
 			continue;
 		}
 		std::cout << "\nПароль: ";
@@ -240,7 +363,7 @@ void Basic_Program::log_in()
 		if (std::hash<std::string> {}(password) != (*iter)->password_hash())
 		{
 			std::cout << "\nНеправильный пароль";
-			_getch();
+			sleep(2000);
 			continue;
 		}
 		_logined_user = *iter;
@@ -253,7 +376,7 @@ void Basic_Program::sign_up()
 	std::string login, password, username;
 	while (true)
 	{
-		system("cls");
+		clear_screen();
 		std::cout << "Логин: ";
 		if (!get_string(login, LOGIN_MIN_LENGTH))
 		{
@@ -268,7 +391,7 @@ void Basic_Program::sign_up()
 		if (iter != _users.end())
 		{
 			std::cout << "\nПользователь с таким логином уже существует";
-			_getch();
+			sleep(2000);
 			continue;
 		}
 		std::cout << "\nПароль: ";
@@ -332,9 +455,9 @@ void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 
 void Basic_Program::do_command(const std::string &command)
 {
-	if (command == "/add_user")
+	if (command == ADD_USERS_CMD)
 	{
-		system("cls");
+		clear_screen();
 		show_users();
 		std::string number_string;
 		size_t number = 0;
@@ -363,7 +486,7 @@ void Basic_Program::do_command(const std::string &command)
 					"Введите корректный номер: ";
 				continue;
 			}
-				break;
+			break;
 		}
 		if (!is_return)
 		{
@@ -371,16 +494,15 @@ void Basic_Program::do_command(const std::string &command)
 		}
 
 		_current_chat.lock()->add_user(_users[number]);
-		_users[number]->chats().emplace_back(_current_chat);
 	}
-	else if (command == "/show_users")
+	else if (command == SHOW_USERS_CMD)
 	{
-		system("cls");
+		clear_screen();
 		for (auto &user : _current_chat.lock()->users())
 		{
 			std::cout << user.lock()->username() << "\n\n";
 		}
-		_getch();
+		std::cin.ignore(LLONG_MAX, '\n');
 	}
 	else
 	{
@@ -388,48 +510,50 @@ void Basic_Program::do_command(const std::string &command)
 	}
 }
 
-bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_password, bool need_to_erase, char enter, char escape) noexcept
+bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_password, bool need_to_erase) noexcept
 {
 	std::string str;
 	while (true)
 	{
-		const char ch = _getch();
-		if (ch == BACKSPACE)
+		std::getline(std::cin, str);
+		if (str == QUIT_CMD)
 		{
-			if (!str.empty())
-			{
-				str.pop_back();
-				std::cout << "\b \b";
-			}
-		}
-		else if (ch == enter)
-		{
-			if (str.length() >= min_length)
-			{
-				if (need_to_erase)
-				{
-					for (auto &c : str)
-					{
-						std::cout << "\b \b";
-					}
-				}
-				out = std::move(str);
-				return true;
-			}
-			else
-			{
-				std::cout << "\nВведите минимум " << min_length << " символов\n";
-				str.clear();
-			}
-		}
-		else if (ch == escape)
-		{
+
 			return false;
+		}
+		if (str.length() >= min_length)
+		{
+			if (need_to_erase)
+			{
+				for (auto &c : str)
+				{
+					std::cout << "\b \b";
+				}
+			}
+			out = std::move(str);
+
+			return true;
 		}
 		else
 		{
-			str += ch;
-			std::cout << (is_password ? '*' : ch); // Русский язык не завезли
+			std::cout << "\nВведите минимум " << min_length << " символов\n";
+			str.clear();
 		}
 	}
+}
+
+void Basic_Program::sleep(time_t milliseconds)
+{
+	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
+void Basic_Program::clear_screen()
+{
+#ifdef _WIN64
+	system("cls");
+#endif // _WIN64
+
+#ifdef __linux__
+	system("clear");
+#endif // __linux__
 }
