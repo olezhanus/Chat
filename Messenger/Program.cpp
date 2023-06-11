@@ -127,7 +127,6 @@ void Basic_Program::run()
 {
 #ifdef _WIN64
 
-	setlocale(LC_ALL, "Russian");
 	SetConsoleCP(CP_UTF8);
 	SetConsoleOutputCP(CP_UTF8);
 
