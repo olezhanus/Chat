@@ -184,21 +184,11 @@ void Basic_Program::run()
 					show_chats();
 					std::string number_string;
 					size_t number = 0;
-					bool is_continue;
-
 					auto &user_chats = _logined_user.lock()->chats();
 					auto size = user_chats.size();
+
 					std::cout << "¬ведите номер: ";
-					while (is_continue = get_string(number_string))
-					{
-						if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= size)
-						{
-							std::cout << "\n¬ведите корректный номер: ";
-							continue;
-						}
-						break;
-					}
-					if (!is_continue)
+					if (!get_number(number, size))
 					{
 						continue;
 					}
@@ -240,19 +230,12 @@ void Basic_Program::run()
 					// —оздаЄм новый чат с выбранным пользователем и добавл€ем его во все соответствующие вектора
 					clear_screen();
 					show_users();
-					std::string number_string;
 					size_t number = 0;
 					bool is_continue;
 
 					std::cout << "¬ведите номер: ";
-					while (is_continue = get_string(number_string))
+					while (is_continue = get_number(number, _users.size()))
 					{
-						if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= _users.size())
-						{
-							std::cout << "\n¬ведите корректный номер: ";
-							continue;
-						}
-
 						if (_users[number] == _logined_user.lock())
 						{
 							std::cout <<
@@ -459,20 +442,13 @@ void Basic_Program::do_command(const std::string &command)
 	{
 		clear_screen();
 		show_users();
-		std::string number_string;
 		size_t number = 0;
 		bool is_return;
 
 		auto &chat_users = _current_chat.lock()->users();
 		std::cout << "¬ведите номер: ";
-		while (is_return = get_string(number_string))
+		while (is_return = get_number(number, _users.size()))
 		{
-			if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= _users.size())
-			{
-				std::cout << "\n¬ведите корректный номер: ";
-				continue;
-			}
-
 			if (std::find_if(
 				chat_users.begin(),
 				chat_users.end(),
@@ -540,6 +516,25 @@ bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_pass
 			str.clear();
 		}
 	}
+}
+
+bool Basic_Program::get_number(size_t &out, size_t max_number)
+{
+	std::string number_string;
+	size_t number = 0;
+	bool is_continue;
+	while (is_continue = get_string(number_string))
+	{
+		if (!sscanf(number_string.c_str(), "%zu", &number) || number >= max_number)
+		{
+			std::cout << "\n¬ведите корректный номер: ";
+			continue;
+		}
+		out = number;
+		break;
+	}
+
+	return is_continue;
 }
 
 void Basic_Program::sleep(time_t milliseconds)

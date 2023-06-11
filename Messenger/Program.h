@@ -24,6 +24,7 @@
 #include <thread>
 #include <nlohmann/json.hpp>
 #include <cstdio>
+#include <climits>
 #include "Chat.h"
 #include "User.h"
 #include "Message.h"
@@ -69,5 +70,5 @@ protected:
 
 	virtual void do_command(const std::string &command);
 	virtual bool get_string(std::string &out, size_t min_length = 0, bool is_password = false, bool need_to_erase = false) noexcept;
-
+	virtual bool get_number(size_t &out, size_t max_number);
 };
