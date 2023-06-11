@@ -34,6 +34,7 @@ namespace fs = std::filesystem;
 #define USERS_FILE "users.json"
 #define CHATS_FILE "chats.json"
 
+
 #define QUIT_CMD "/q"
 #define SHOW_USERS_CMD "/shu"
 #define ADD_USERS_CMD "/addu"

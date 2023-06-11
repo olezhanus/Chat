@@ -426,10 +426,8 @@ void Basic_Program::show_messages() noexcept
 
 void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 {
-	tm _tm;
 	time_t t = mes->date();
-	localtime_s(&_tm, &t);
-	auto date = std::put_time(&_tm, "%Y %T");
+	auto date = std::put_time(std::localtime(&t), "%Y %T");
 	std::cout <<
 		(mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n" <<
 		mes->message() << "\n" <<
