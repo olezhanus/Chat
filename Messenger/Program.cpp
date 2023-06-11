@@ -3,7 +3,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Program.h"
 
-Basic_Program::Basic_Program() noexcept
+Basic_Program::Basic_Program() noexcept // здесь открываются и считываются файлы конфигурации
 {
 	nlohmann::json chats_json, users_json;
 
@@ -73,7 +73,7 @@ Basic_Program::Basic_Program() noexcept
 	}
 }
 
-Basic_Program::~Basic_Program()
+Basic_Program::~Basic_Program() // здесь создаются файлы конфигурации
 {
 	nlohmann::json chats_json, users_json;
 	chats_json["_Id_Counter"] = Chat::_Id_Counter;
