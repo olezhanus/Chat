@@ -62,7 +62,6 @@ Basic_Program::Basic_Program() noexcept
 						});
 					chat->messages()[index]->_from = *user_from;
 				}
-
 			}
 		}
 		catch (const std::exception &e)
@@ -124,9 +123,6 @@ Basic_Program::~Basic_Program()
 	fs::permissions(CHATS_FILE, fs::perms::owner_all);
 }
 
-
-
-
 void Basic_Program::run()
 {
 #ifdef _WIN64
@@ -137,18 +133,18 @@ void Basic_Program::run()
 
 #endif // _WIN64
 
-
 	while (true)
 	{
 		clear_screen();
 		if (_logined_user.expired())
 		{
-			std::cout << QUIT_CMD " - выход.\tl - войти.\ts - создать аккаунт.\n";
+			std::cout << QUIT_CMD " - РІС‹С…РѕРґ.\tl - РІРѕР№С‚Рё.\ts - СЃРѕР·РґР°С‚СЊ Р°РєРєР°СѓРЅС‚.\n";
 			std::string command;
 			bool is_break;
 
 			while ((is_break = get_string(command)) &&
-				   command != "l" && command != "s"); // будет ждать ввода правильного символа
+				   command != "l" && command != "s")
+				; // Р±СѓРґРµС‚ Р¶РґР°С‚СЊ РІРІРѕРґР° РїСЂР°РІРёР»СЊРЅРѕРіРѕ СЃРёРјРІРѕР»Р°
 
 			if (!is_break)
 			{
@@ -167,12 +163,13 @@ void Basic_Program::run()
 		{
 			if (_current_chat.expired())
 			{
-				std::cout << QUIT_CMD " - выход.\ts - выбрать чат.\td - удалить чат\t\tn - новый чат.\n";
+				std::cout << QUIT_CMD " - РІС‹С…РѕРґ.\ts - РІС‹Р±СЂР°С‚СЊ С‡Р°С‚.\td - СѓРґР°Р»РёС‚СЊ С‡Р°С‚\t\tn - РЅРѕРІС‹Р№ С‡Р°С‚.\n";
 				std::string command;
 				bool is_continue;
 
 				while ((is_continue = get_string(command)) &&
-					   command != "s" && command != "d" && command != "n");
+					   command != "s" && command != "d" && command != "n")
+					;
 
 				if (!is_continue)
 				{
@@ -187,7 +184,7 @@ void Basic_Program::run()
 					auto &user_chats = _logined_user.lock()->chats();
 					auto size = user_chats.size();
 
-					std::cout << "Введите номер: ";
+					std::cout << "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ: ";
 					if (!get_number(number, size))
 					{
 						continue;
@@ -201,7 +198,7 @@ void Basic_Program::run()
 					}
 					if (command == "d")
 					{
-						// выходим из чата. Если чат пуст, удаляем его
+						// РІС‹С…РѕРґРёРј РёР· С‡Р°С‚Р°. Р•СЃР»Рё С‡Р°С‚ РїСѓСЃС‚, СѓРґР°Р»СЏРµРј РµРіРѕ
 						auto user_chat = user_chats[index].lock();
 						auto &user_chat_users = user_chat->users();
 						auto iter = std::find_if(
@@ -212,7 +209,7 @@ void Basic_Program::run()
 								return el.lock() == _logined_user.lock();
 							});
 
-						user_chat->new_message(std::make_shared<Message>(std::move("*Покинул чат*"), _logined_user));
+						user_chat->new_message(std::make_shared<Message>(std::move("*РџРѕРєРёРЅСѓР» С‡Р°С‚*"), _logined_user));
 						user_chat_users.erase(iter);
 						if (user_chat_users.empty())
 						{
@@ -227,20 +224,19 @@ void Basic_Program::run()
 				}
 				if (command == "n")
 				{
-					// Создаём новый чат с выбранным пользователем и добавляем его во все соответствующие вектора
+					// РЎРѕР·РґР°С‘Рј РЅРѕРІС‹Р№ С‡Р°С‚ СЃ РІС‹Р±СЂР°РЅРЅС‹Рј РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј Рё РґРѕР±Р°РІР»СЏРµРј РµРіРѕ РІРѕ РІСЃРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёРµ РІРµРєС‚РѕСЂР°
 					clear_screen();
 					show_users();
 					size_t number = 0;
 					bool is_continue;
 
-					std::cout << "Введите номер: ";
+					std::cout << "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ: ";
 					while (is_continue = get_number(number, _users.size()))
 					{
 						if (_users[number] == _logined_user.lock())
 						{
-							std::cout <<
-								"\nВ беседе не может быть два одинаковых пользователя\n"
-								"Введите корректный номер: ";
+							std::cout << "\nР’ Р±РµСЃРµРґРµ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РґРІР° РѕРґРёРЅР°РєРѕРІС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ\n"
+										 "Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ: ";
 							continue;
 						}
 						break;
@@ -250,7 +246,7 @@ void Basic_Program::run()
 						continue;
 					}
 
-					std::cout << "\nВведите название: ";
+					std::cout << "\nР’РІРµРґРёС‚Рµ РЅР°Р·РІР°РЅРёРµ: ";
 					std::string title;
 					if (!get_string(title, NAME_MIN_LENGTH))
 					{
@@ -264,9 +260,7 @@ void Basic_Program::run()
 			}
 			else
 			{
-				std::cout <<
-					"Введите сообщение или одну из следующих команд:\n"
-					ADD_USERS_CMD " - добавить участника\t" SHOW_USERS_CMD " - показать участников беседы\n\n";
+				std::cout << "Р’РІРµРґРёС‚Рµ СЃРѕРѕР±С‰РµРЅРёРµ РёР»Рё РѕРґРЅСѓ РёР· СЃР»РµРґСѓСЋС‰РёС… РєРѕРјР°РЅРґ:\n" ADD_USERS_CMD " - РґРѕР±Р°РІРёС‚СЊ СѓС‡Р°СЃС‚РЅРёРєР°\t" SHOW_USERS_CMD " - РїРѕРєР°Р·Р°С‚СЊ СѓС‡Р°СЃС‚РЅРёРєРѕРІ Р±РµСЃРµРґС‹\n\n";
 				show_messages();
 				std::string message_string;
 				while (true)
@@ -288,7 +282,7 @@ void Basic_Program::run()
 						{
 							_current_chat.lock()->new_message(std::make_shared<Message>(std::move(message_string), _logined_user));
 
-							// Перемещаем _current_chat с новым сообщением в конец массива
+							// РџРµСЂРµРјРµС‰Р°РµРј _current_chat СЃ РЅРѕРІС‹Рј СЃРѕРѕР±С‰РµРЅРёРµРј РІ РєРѕРЅРµС† РјР°СЃСЃРёРІР°
 							auto &user_chat = _logined_user.lock()->chats();
 							if (_current_chat.lock() != user_chat.back().lock())
 							{
@@ -319,33 +313,28 @@ void Basic_Program::log_in()
 	while (true)
 	{
 		clear_screen();
-		std::cout << "Логин: ";
+		std::cout << "Р›РѕРіРёРЅ: ";
 		if (!get_string(login))
 		{
 			break;
 		}
-		auto iter = _users.empty() ? _users.end() : std::find_if(
-			_users.begin(),
-			_users.end(),
-			[=](std::shared_ptr<User> el) -> bool
-			{
-				return el->login() == login;
-			});
+		auto iter = _users.empty() ? _users.end() : std::find_if(_users.begin(), _users.end(), [=](std::shared_ptr<User> el) -> bool
+																 { return el->login() == login; });
 
 		if (iter == _users.end())
 		{
-			std::cout << "\nПользователя с таким логином не существует";
+			std::cout << "\nРџРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ С‚Р°РєРёРј Р»РѕРіРёРЅРѕРј РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚";
 			sleep(2000);
 			continue;
 		}
-		std::cout << "\nПароль: ";
+		std::cout << "\nРџР°СЂРѕР»СЊ: ";
 		if (!get_string(password, PASSWORD_MIN_LENGTH, true))
 		{
 			continue;
 		}
-		if (std::hash<std::string> {}(password) != (*iter)->password_hash())
+		if (std::hash<std::string>{}(password) != (*iter)->password_hash())
 		{
-			std::cout << "\nНеправильный пароль";
+			std::cout << "\nРќРµРїСЂР°РІРёР»СЊРЅС‹Р№ РїР°СЂРѕР»СЊ";
 			sleep(2000);
 			continue;
 		}
@@ -360,29 +349,25 @@ void Basic_Program::sign_up()
 	while (true)
 	{
 		clear_screen();
-		std::cout << "Логин: ";
+		std::cout << "Р›РѕРіРёРЅ: ";
 		if (!get_string(login, LOGIN_MIN_LENGTH))
 		{
 			break;
 		}
-		auto iter = _users.empty() ? _users.end() : std::find_if(
-			_users.begin(), _users.end(),
-			[=](std::shared_ptr<User> el) -> bool
-			{
-				return el->login() == login;
-			});
+		auto iter = _users.empty() ? _users.end() : std::find_if(_users.begin(), _users.end(), [=](std::shared_ptr<User> el) -> bool
+																 { return el->login() == login; });
 		if (iter != _users.end())
 		{
-			std::cout << "\nПользователь с таким логином уже существует";
+			std::cout << "\nРџРѕР»СЊР·РѕРІР°С‚РµР»СЊ СЃ С‚Р°РєРёРј Р»РѕРіРёРЅРѕРј СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚";
 			sleep(2000);
 			continue;
 		}
-		std::cout << "\nПароль: ";
+		std::cout << "\nРџР°СЂРѕР»СЊ: ";
 		if (!get_string(password, PASSWORD_MIN_LENGTH, true))
 		{
 			continue;
 		}
-		std::cout << "\nВведите имя пользователя: ";
+		std::cout << "\nР’РІРµРґРёС‚Рµ РёРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ: ";
 		if (!get_string(username, NAME_MIN_LENGTH))
 		{
 			continue;
@@ -403,8 +388,7 @@ void Basic_Program::show_chats()
 	auto size = _logined_user.lock()->chats().size();
 	for (size_t i = 0; i < size; ++i)
 	{
-		std::cout << i << '\t' <<
-			_logined_user.lock()->chats()[size - i - 1].lock()->title() << "\n\n";
+		std::cout << i << '\t' << _logined_user.lock()->chats()[size - i - 1].lock()->title() << "\n\n";
 	}
 }
 
@@ -428,10 +412,9 @@ void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 {
 	time_t t = mes->date();
 	auto date = std::put_time(std::localtime(&t), "%Y %T");
-	std::cout <<
-		(mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n" <<
-		mes->message() << "\n" <<
-		date << "\n\n\n";
+	std::cout << (mes->from().lock() == _logined_user.lock() ? "Р’С‹" : mes->from().lock()->username()) << ":\n"
+			  << mes->message() << "\n"
+			  << date << "\n\n\n";
 }
 
 void Basic_Program::do_command(const std::string &command)
@@ -444,20 +427,19 @@ void Basic_Program::do_command(const std::string &command)
 		bool is_return;
 
 		auto &chat_users = _current_chat.lock()->users();
-		std::cout << "Введите номер: ";
+		std::cout << "Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ: ";
 		while (is_return = get_number(number, _users.size()))
 		{
 			if (std::find_if(
-				chat_users.begin(),
-				chat_users.end(),
-				[=](std::weak_ptr<User> el) -> bool
-				{
-					return el.lock() == _users[number];
-				}) != chat_users.end())
+					chat_users.begin(),
+					chat_users.end(),
+					[=](std::weak_ptr<User> el) -> bool
+					{
+						return el.lock() == _users[number];
+					}) != chat_users.end())
 			{
-				std::cout <<
-					"\nВ беседе не может быть два одинаковых пользователя\n"
-					"Введите корректный номер: ";
+				std::cout << "\nР’ Р±РµСЃРµРґРµ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РґРІР° РѕРґРёРЅР°РєРѕРІС‹С… РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ\n"
+							 "Р’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ: ";
 				continue;
 			}
 			break;
@@ -480,7 +462,7 @@ void Basic_Program::do_command(const std::string &command)
 	}
 	else
 	{
-		std::cout << "\nНеизвестная команда\n";
+		std::cout << "\nРќРµРёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР°\n";
 	}
 }
 
@@ -510,7 +492,7 @@ bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_pass
 		}
 		else
 		{
-			std::cout << "\nВведите минимум " << min_length << " символов\n";
+			std::cout << "\nР’РІРµРґРёС‚Рµ РјРёРЅРёРјСѓРј " << min_length << " СЃРёРјРІРѕР»РѕРІ\n";
 			str.clear();
 		}
 	}
@@ -525,7 +507,7 @@ bool Basic_Program::get_number(size_t &out, size_t max_number)
 	{
 		if (!sscanf(number_string.c_str(), "%zu", &number) || number >= max_number)
 		{
-			std::cout << "\nВведите корректный номер: ";
+			std::cout << "\nР’РІРµРґРёС‚Рµ РєРѕСЂСЂРµРєС‚РЅС‹Р№ РЅРѕРјРµСЂ: ";
 			continue;
 		}
 		out = number;

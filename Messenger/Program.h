@@ -11,7 +11,6 @@
 
 #endif // __linux__
 
-
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -34,7 +33,6 @@ namespace fs = std::filesystem;
 #define USERS_FILE "users.json"
 #define CHATS_FILE "chats.json"
 
-
 #define QUIT_CMD "/q"
 #define SHOW_USERS_CMD "/shu"
 #define ADD_USERS_CMD "/addu"
@@ -42,8 +40,7 @@ namespace fs = std::filesystem;
 #define PASSWORD_MIN_LENGTH 1
 #define NAME_MIN_LENGTH 1
 
-
-class Basic_Program // Базовый класс программы с консольным интерфейсом. от него можно наследовать другие реализации UI
+class Basic_Program // Р‘Р°Р·РѕРІС‹Р№ РєР»Р°СЃСЃ РїСЂРѕРіСЂР°РјРјС‹ СЃ РєРѕРЅСЃРѕР»СЊРЅС‹Рј РёРЅС‚РµСЂС„РµР№СЃРѕРј. РѕС‚ РЅРµРіРѕ РјРѕР¶РЅРѕ РЅР°СЃР»РµРґРѕРІР°С‚СЊ РґСЂСѓРіРёРµ СЂРµР°Р»РёР·Р°С†РёРё UI
 {
 public:
 	Basic_Program() noexcept;
@@ -54,11 +51,12 @@ public:
 	virtual void run();
 	static void sleep(time_t milliseconds);
 	static void clear_screen();
-	
+
 	virtual ~Basic_Program();
+
 protected:
 	std::vector<std::shared_ptr<User>> _users;
-	std::vector<std::shared_ptr<Chat>> _chats; // Список всех чатов
+	std::vector<std::shared_ptr<Chat>> _chats; // РЎРїРёСЃРѕРє РІСЃРµС… С‡Р°С‚РѕРІ
 	std::weak_ptr<User> _logined_user;
 	std::weak_ptr<Chat> _current_chat;
 	virtual void log_in();

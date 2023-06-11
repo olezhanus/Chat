@@ -28,6 +28,7 @@ public:
 
 	static Chat from_json(const nlohmann::json &j);
 	static nlohmann::json to_json(const Chat &chat);
+
 private:
 	Chat(const nlohmann::json &j) noexcept;
 	static size_t _Id_Counter;

@@ -26,6 +26,7 @@ public:
 
 	static User from_json(const nlohmann::json &j);
 	static nlohmann::json to_json(const User &user);
+
 private:
 	User(const nlohmann::json &j) noexcept;
 	static size_t _Id_Counter;
@@ -33,6 +34,5 @@ private:
 	std::string _username;
 	std::string _login;
 	size_t _password_hash;
-	std::vector<std::weak_ptr<Chat>> _chats; // Список чатов, где есть данный пользователь
+	std::vector<std::weak_ptr<Chat>> _chats; // РЎРїРёСЃРѕРє С‡Р°С‚РѕРІ, РіРґРµ РµСЃС‚СЊ РґР°РЅРЅС‹Р№ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊ
 };
-

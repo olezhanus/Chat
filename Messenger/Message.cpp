@@ -56,7 +56,7 @@ Message Message::from_json(const nlohmann::json &j)
 	}
 	else
 	{
-		throw std::exception("bad json");
+		throw std::exception();
 	}
 }
 
