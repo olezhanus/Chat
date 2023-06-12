@@ -119,7 +119,7 @@ Basic_Program::~Basic_Program()
 		}
 		CHATS.close();
 	}
-	fs::permissions(USERS_FILE, fs::perms::owner_all);
+	fs::permissions(USERS_FILE, fs::perms::owner_all); // Забираем права на файлы у всех, кроме владельца
 	fs::permissions(CHATS_FILE, fs::perms::owner_all);
 }
 
