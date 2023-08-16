@@ -409,8 +409,18 @@ void Basic_Program::show_messages() noexcept
 
 void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 {
+#ifdef _WIN64
+	time_t t = mes->date();
+	tm tm;
+	localtime_s(&tm, &t);
+	auto date = std::put_time(&tm, "%Y %T");
+#endif // _WIN64
+
+#ifdef __linux__
 	time_t t = mes->date();
 	auto date = std::put_time(std::localtime(&t), "%Y %T");
+#endif // __linux__
+
 	std::cout << (mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n"
 			  << mes->message() << "\n"
 			  << date << "\n\n\n";
@@ -504,7 +514,13 @@ bool Basic_Program::get_number(size_t &out, size_t max_number)
 	bool is_continue;
 	while (is_continue = get_string(number_string))
 	{
+#ifdef _WIN64
+		if (!sscanf_s(number_string.c_str(), "%zu", &number) || number >= max_number)
+#endif // _WIN64
+
+#ifdef __linux__
 		if (!sscanf(number_string.c_str(), "%zu", &number) || number >= max_number)
+#endif // __linux__
 		{
 			std::cout << "\nВведите корректный номер: ";
 			continue;
