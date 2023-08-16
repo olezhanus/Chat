@@ -137,12 +137,12 @@ void Basic_Program::run()
 		clear_screen();
 		if (_logined_user.expired())
 		{
-			std::cout << QUIT_CMD " - выход.\tl - войти.\ts - создать аккаунт.\n";
+			std::cout << QUIT_CMD " - выход.\tl - войти.\ts - создать аккаунт." << std::endl;
 			std::string command;
 			bool is_break;
 
 			while ((is_break = get_string(command)) &&
-				   command != "l" && command != "s")
+				command != "l" && command != "s")
 				; // будет ждать ввода правильного символа
 
 			if (!is_break)
@@ -162,12 +162,12 @@ void Basic_Program::run()
 		{
 			if (_current_chat.expired())
 			{
-				std::cout << QUIT_CMD " - выход.\ts - выбрать чат.\td - удалить чат\t\tn - новый чат.\n";
+				std::cout << QUIT_CMD " - выход.\ts - выбрать чат.\td - удалить чат\t\tn - новый чат." << std::endl;
 				std::string command;
 				bool is_continue;
 
 				while ((is_continue = get_string(command)) &&
-					   command != "s" && command != "d" && command != "n")
+					command != "s" && command != "d" && command != "n")
 					;
 
 				if (!is_continue)
@@ -234,8 +234,8 @@ void Basic_Program::run()
 					{
 						if (_users[number] == _logined_user.lock())
 						{
-							std::cout << "\nВ беседе не может быть два одинаковых пользователя\n"
-										 "Введите корректный номер: ";
+							std::cout << std::endl << "В беседе не может быть два одинаковых пользователя\n"
+								"Введите корректный номер: ";
 							continue;
 						}
 						break;
@@ -245,7 +245,7 @@ void Basic_Program::run()
 						continue;
 					}
 
-					std::cout << "\nВведите название: ";
+					std::cout << std::endl << "Введите название: ";
 					std::string title;
 					if (!get_string(title, NAME_MIN_LENGTH))
 					{
@@ -259,7 +259,7 @@ void Basic_Program::run()
 			}
 			else
 			{
-				std::cout << "Введите сообщение или одну из следующих команд:\n" ADD_USERS_CMD " - добавить участника\t" SHOW_USERS_CMD " - показать участников беседы\n\n";
+				std::cout << "Введите сообщение или одну из следующих команд:" << std::endl << ADD_USERS_CMD " - добавить участника\t" SHOW_USERS_CMD " - показать участников беседы" << std::endl << std::endl;
 				show_messages();
 				std::string message_string;
 				while (true)
@@ -318,22 +318,24 @@ void Basic_Program::log_in()
 			break;
 		}
 		auto iter = _users.empty() ? _users.end() : std::find_if(_users.begin(), _users.end(), [=](std::shared_ptr<User> el) -> bool
-																 { return el->login() == login; });
+			{
+				return el->login() == login;
+			});
 
 		if (iter == _users.end())
 		{
-			std::cout << "\nПользователя с таким логином не существует";
+			std::cout << std::endl << "Пользователя с таким логином не существует";
 			sleep(2000);
 			continue;
 		}
-		std::cout << "\nПароль: ";
+		std::cout << std::endl << "Пароль: ";
 		if (!get_string(password, PASSWORD_MIN_LENGTH, true))
 		{
 			continue;
 		}
 		if (std::hash<std::string>{}(password) != (*iter)->password_hash())
 		{
-			std::cout << "\nНеправильный пароль";
+			std::cout << std::endl << "Неправильный пароль";
 			sleep(2000);
 			continue;
 		}
@@ -354,19 +356,21 @@ void Basic_Program::sign_up()
 			break;
 		}
 		auto iter = _users.empty() ? _users.end() : std::find_if(_users.begin(), _users.end(), [=](std::shared_ptr<User> el) -> bool
-																 { return el->login() == login; });
+			{
+				return el->login() == login;
+			});
 		if (iter != _users.end())
 		{
-			std::cout << "\nПользователь с таким логином уже существует";
+			std::cout << std::endl << "Пользователь с таким логином уже существует";
 			sleep(2000);
 			continue;
 		}
-		std::cout << "\nПароль: ";
+		std::cout << std::endl << "Пароль: ";
 		if (!get_string(password, PASSWORD_MIN_LENGTH, true))
 		{
 			continue;
 		}
-		std::cout << "\nВведите имя пользователя: ";
+		std::cout << std::endl << "Введите имя пользователя: ";
 		if (!get_string(username, NAME_MIN_LENGTH))
 		{
 			continue;
@@ -387,7 +391,7 @@ void Basic_Program::show_chats()
 	auto size = _logined_user.lock()->chats().size();
 	for (size_t i = 0; i < size; ++i)
 	{
-		std::cout << i << '\t' << _logined_user.lock()->chats()[size - i - 1].lock()->title() << "\n\n";
+		std::cout << i << '\t' << _logined_user.lock()->chats()[size - i - 1].lock()->title() << std::endl << std::endl;
 	}
 }
 
@@ -395,7 +399,7 @@ void Basic_Program::show_users()
 {
 	for (size_t i = 0; i < _users.size(); ++i)
 	{
-		std::cout << i << '\t' << _users[i]->username() << "\n\n";
+		std::cout << i << '\t' << _users[i]->username() << std::endl << std::endl;
 	}
 }
 
@@ -424,6 +428,9 @@ void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 	std::cout << (mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n"
 			  << mes->message() << "\n"
 			  << date << "\n\n\n";
+	std::cout << (mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ':' << std::endl
+		<< mes->message() << std::endl
+		<< date << std::endl << std::endl << std::endl;
 }
 
 void Basic_Program::do_command(const std::string &command)
@@ -440,15 +447,16 @@ void Basic_Program::do_command(const std::string &command)
 		while (is_return = get_number(number, _users.size()))
 		{
 			if (std::find_if(
-					chat_users.begin(),
-					chat_users.end(),
-					[=](std::weak_ptr<User> el) -> bool
-					{
-						return el.lock() == _users[number];
-					}) != chat_users.end())
+				chat_users.begin(),
+				chat_users.end(),
+				[=](std::weak_ptr<User> el) -> bool
+				{
+					return el.lock() == _users[number];
+				}) != chat_users.end())
 			{
-				std::cout << "\nВ беседе не может быть два одинаковых пользователя\n"
-							 "Введите корректный номер: ";
+				std::cout << std::endl
+					<< "В беседе не может быть два одинаковых пользователя" << std::endl
+					<< "Введите корректный номер: ";
 				continue;
 			}
 			break;
@@ -471,7 +479,7 @@ void Basic_Program::do_command(const std::string &command)
 	}
 	else
 	{
-		std::cout << "\nНеизвестная команда\n";
+		std::cout << std::endl << "Неизвестная команда" << std::endl;
 	}
 }
 
@@ -501,7 +509,7 @@ bool Basic_Program::get_string(std::string &out, size_t min_length, bool is_pass
 		}
 		else
 		{
-			std::cout << "\nВведите минимум " << min_length << " символов\n";
+			std::cout << std::endl << "Введите минимум " << min_length << " символов" << std::endl;
 			str.clear();
 		}
 	}
@@ -522,7 +530,7 @@ bool Basic_Program::get_number(size_t &out, size_t max_number)
 		if (!sscanf(number_string.c_str(), "%zu", &number) || number >= max_number)
 #endif // __linux__
 		{
-			std::cout << "\nВведите корректный номер: ";
+			std::cout << std::endl << "Введите корректный номер: ";
 			continue;
 		}
 		out = number;
