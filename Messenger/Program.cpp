@@ -425,9 +425,6 @@ void Basic_Program::print_message(const std::shared_ptr<Message> &mes) noexcept
 	auto date = std::put_time(std::localtime(&t), "%Y %T");
 #endif // __linux__
 
-	std::cout << (mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ":\n"
-			  << mes->message() << "\n"
-			  << date << "\n\n\n";
 	std::cout << (mes->from().lock() == _logined_user.lock() ? "Вы" : mes->from().lock()->username()) << ':' << std::endl
 		<< mes->message() << std::endl
 		<< date << std::endl << std::endl << std::endl;
