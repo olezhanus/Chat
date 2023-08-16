@@ -10,7 +10,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
 
 target_include_directories(Messenger PRIVATE
 "C:/Users/olezh/source/repos/libraries/json/include"
-"C:/Users/olezh/source/repos/libraries/boost_1_82_0"
+"C:/Users/olezh/source/repos/libraries/boost_1_83_0"
 "C:/Program Files/MySQL/MySQL Server 8.0/include")
 
 target_link_libraries(Messenger PRIVATE
